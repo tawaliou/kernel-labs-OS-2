@@ -37,7 +37,7 @@ sudo /sbin/ip link set dev "$device" down
 sudo /sbin/ip address add $subnet.1/24 dev "$device"
 sudo /sbin/ip link set dev "$device" up
 
-if [ -e $(which --skip-alias firewall-cmd) ]; then
+if command -v firewall-cmd > /dev/null 2>&1; then
     sudo firewall-cmd --zone=trusted --change-interface=$device
 fi
 

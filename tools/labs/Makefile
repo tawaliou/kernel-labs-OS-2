@@ -55,7 +55,11 @@ clean::
 	[ ! -f skels/Kbuild ] || $(MAKE) -C $(KDIR) M=$(KDIR)/tools/labs/skels ARCH=$(ARCH) clean
 	for i in $(shell find skels -name Makefile | xargs --no-run-if-empty dirname); do $(MAKE) -C $$i clean; done
 
+clean_modules:
+	[ ! -f skels/Kbuild ] || $(MAKE) -C $(KDIR) M=$(KDIR)/tools/labs/skels ARCH=$(ARCH) clean
+	for i in $(shell find skels -name Makefile | xargs --no-run-if-empty dirname); do $(MAKE) -C $$i clean; done
+
 clean_skels:
 	rm -rf skels
 
-.PHONY: skels build copy docs docker-docs docker-kernel stop-docker-kernel clean clean_skels
+.PHONY: skels build copy docs docker-docs docker-kernel stop-docker-kernel clean clean_modules clean_skels
