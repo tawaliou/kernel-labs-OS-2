@@ -1,3 +1,4 @@
+linux
 vmlinux
 zImage
 serial.pts
@@ -11,5 +12,3 @@ disk2.img
 /out/
 /rootfs
 linux/
-linux
-
