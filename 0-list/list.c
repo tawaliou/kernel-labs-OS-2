@@ -16,6 +16,8 @@
 #include <linux/uaccess.h>
 
 #define PROCFS_MAX_SIZE 512
+#define PROCFS_CMD_MAX_SIZE 5
+#define PROCFS_NAME_MAX_SIZE (PROCFS_MAX_SIZE - PROCFS_CMD_MAX_SIZE - 1)
 
 #define procfs_dir_name "list"
 #define procfs_file_read "preview"
@@ -26,13 +28,24 @@ struct proc_dir_entry *proc_list_read;
 struct proc_dir_entry *proc_list_write;
 
 /* TODO 2: define your list! */
+struct procfs_list_data {
+	char name[PROCFS_NAME_MAX_SIZE];
+	struct list_head list;
+};
+
 struct list_head head;
-INIT_HEAD(head);
+LIST_HEAD(head);
 
 static int list_proc_show(struct seq_file *m, void *v)
 {
+	struct list_head *pos;
+	struct procfs_list_data *tmp;
 	/* TODO 3: print your list. One element / line. */
-	seq_puts(m, "Remove this line\n");
+	// seq_puts(m, "Remove this line\n");
+	list_for_each (pos, &head) {
+		tmp = list_entry(pos, struct procfs_list_data, list);
+		seq_printf(m, "%s\n", tmp->name);
+	}
 
 	return 0;
 }
@@ -52,6 +65,8 @@ static ssize_t list_write(struct file *file, const char __user *buffer,
 {
 	char local_buffer[PROCFS_MAX_SIZE];
 	unsigned long local_buffer_size = 0;
+	char cmd[PROCFS_CMD_MAX_SIZE];
+	char name[PROCFS_NAME_MAX_SIZE];
 
 	local_buffer_size = count;
 	if (local_buffer_size > PROCFS_MAX_SIZE)
@@ -64,7 +79,14 @@ static ssize_t list_write(struct file *file, const char __user *buffer,
 	/* local_buffer contains your command written in /proc/list/management
 	 * TODO 4/0: parse the command and add/delete elements.
 	 */
-	pr_info("local buffer: %s \n", local_buffer);
+	memcpy(cmd, local_buffer, PROCFS_CMD_MAX_SIZE - 1);
+	cmd[PROCFS_CMD_MAX_SIZE - 1] = '\0';
+
+	memcpy(name, local_buffer + PROCFS_CMD_MAX_SIZE,
+	       PROCFS_NAME_MAX_SIZE - 1);
+	name[PROCFS_NAME_MAX_SIZE - 1] = '\0';
+
+	pr_info("(cmd, name): (%s,%s)\n", cmd, name);
 
 	return local_buffer_size;
 }
@@ -106,9 +128,23 @@ proc_list_cleanup:
 	return -ENOMEM;
 }
 
+static void procfs_list_purge(void)
+{
+	struct list_head *pos;
+	struct list_head *n;
+	struct procfs_list_data *tmp;
+
+	list_for_each_safe (pos, n, &head) {
+		tmp = list_entry(&head, struct procfs_list_data, list);
+		list_del(pos);
+		kfree(tmp);
+	}
+}
+
 static void list_exit(void)
 {
 	proc_remove(proc_list);
+	procfs_list_purge();
 }
 
 module_init(list_init);
