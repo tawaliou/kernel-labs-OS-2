@@ -163,15 +163,14 @@ static ssize_t list_write(struct file *file, const char __user *buffer,
 	//        PROCFS_NAME_MAX_SIZE - 1);
 	name[PROCFS_NAME_MAX_SIZE - 1] = '\0';
 
-	if (!strcmp(cmd, CDM_ADDF)) {
+	if (!strcmp(cmd, CDM_ADDF))
 		list_proc_addf(name);
-	} else if (!strcmp(cmd, CDM_ADDE)) {
+	else if (!strcmp(cmd, CDM_ADDE))
 		list_proc_adde(name);
-	} else if (!strcmp(cmd, CDM_DELF)) {
+	else if (!strcmp(cmd, CDM_DELF))
 		list_proc_delf(name);
-	} else if (!strcmp(cmd, CDM_DELA)) {
+	else if (!strcmp(cmd, CDM_DELA))
 		list_proc_dela(name);
-	}
 
 	return local_buffer_size;
 }
