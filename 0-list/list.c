@@ -49,6 +49,7 @@ static struct list_proc_data *list_proc_alloc(char *name)
 		return NULL;
 
 	memcpy(lp->name, name, PROCFS_NAME_MAX_SIZE);
+	lp->name[PROCFS_NAME_MAX_SIZE - 1] = '\0';
 
 	return lp;
 }
@@ -58,6 +59,9 @@ static void list_proc_addf(char *name)
 	struct list_proc_data *lp;
 
 	lp = list_proc_alloc(name);
+	if (!lp)
+		return;
+
 	list_add(&lp->list, &head);
 }
 
@@ -66,6 +70,9 @@ static void list_proc_adde(char *name)
 	struct list_proc_data *lp;
 
 	lp = list_proc_alloc(name);
+	if (!lp)
+		return;
+
 	list_add_tail(&lp->list, &head);
 }
 
@@ -108,7 +115,7 @@ static int list_proc_show(struct seq_file *m, void *v)
 	// seq_puts(m, "Remove this line\n");
 	list_for_each (pos, &head) {
 		tmp = list_entry(pos, struct list_proc_data, list);
-		seq_printf(m, "%s", tmp->name);
+		seq_printf(m, "%s\n", tmp->name);
 	}
 
 	return 0;
@@ -159,8 +166,7 @@ static ssize_t list_write(struct file *file, const char __user *buffer,
 	memcpy(cmd, local_buffer, PROCFS_CMD_MAX_SIZE - 1);
 	cmd[PROCFS_CMD_MAX_SIZE - 1] = '\0';
 
-	// memcpy(name, local_buffer + PROCFS_CMD_MAX_SIZE,
-	//        PROCFS_NAME_MAX_SIZE - 1);
+	name[strcspn(name, "\n")] = '\0';
 	name[PROCFS_NAME_MAX_SIZE - 1] = '\0';
 
 	if (!strcmp(cmd, CDM_ADDF))
